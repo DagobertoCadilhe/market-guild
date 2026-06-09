@@ -1,5 +1,6 @@
 package com.marketguild.market_service.controller;
 
+import com.marketguild.market_service.client.PlayerClient;
 import com.marketguild.market_service.dto.ItemDTO;
 import com.marketguild.market_service.model.Item;
 import com.marketguild.market_service.service.ItemService;
@@ -22,6 +23,7 @@ public class ItemController {
 
     @PostMapping()
     public Item createItem(@RequestBody ItemDTO itemDTO){
+
         Item newItem = itemService.createItem(itemDTO.getName(), itemDTO.getPrice(), itemDTO.getSellerId());
         return newItem;
     }
