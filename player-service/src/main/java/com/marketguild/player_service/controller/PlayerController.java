@@ -7,7 +7,7 @@ import com.marketguild.player_service.service.PlayerService;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/players")
+@RequestMapping("/api/players")/
 public class PlayerController {
     private final PlayerService playerService;
 
