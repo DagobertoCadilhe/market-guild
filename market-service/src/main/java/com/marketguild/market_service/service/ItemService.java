@@ -1,7 +1,9 @@
 package com.marketguild.market_service.service;
 
 import com.marketguild.market_service.client.PlayerClient;
+import com.marketguild.market_service.event.ItemBoughtEvent;
 import com.marketguild.market_service.model.Item;
+import com.marketguild.market_service.producer.ItemBoughtProducer;
 import com.marketguild.market_service.repository.ItemRepository;
 import feign.FeignException;
 import org.springframework.http.HttpStatus;
@@ -18,10 +20,12 @@ public class ItemService {
 
     private final PlayerClient playerClient;
     private final ItemRepository itemRepository;
+    private final ItemBoughtProducer itemBoughtProducer;
 
-    public ItemService(PlayerClient playerClient, ItemRepository itemRepository) {
+    public ItemService(PlayerClient playerClient, ItemRepository itemRepository, ItemBoughtProducer itemBoughtProducer) {
         this.playerClient = playerClient;
         this.itemRepository = itemRepository;
+        this.itemBoughtProducer = itemBoughtProducer;
     }
 
     public Item findItemById(String itemId){
@@ -45,6 +49,11 @@ public class ItemService {
             newItem.setSellerId(sellerId);
 
             itemRepository.save(newItem);
+
+            ItemBoughtEvent  itemBoughtEvent = new ItemBoughtEvent(sellerId, newItem.getId(), price);
+
+            itemBoughtProducer.publishOrderEvent(itemBoughtEvent);
+
             return newItem;
         } catch (FeignException.NotFound e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Player not found with id: " + sellerId);
