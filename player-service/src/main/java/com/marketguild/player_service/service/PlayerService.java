@@ -2,9 +2,9 @@ package com.marketguild.player_service.service;
 
 import com.marketguild.player_service.model.Player;
 import com.marketguild.player_service.repository.PlayerRepository;
-import jakarta.ws.rs.NotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 @Service
@@ -32,9 +32,19 @@ public class PlayerService {
     }
 
     public void updateBalance(Long playerId, double price){
-        Player player = findPlayerById(playerId);
+        Player player = playerRepository.findById(playerId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found with id: "+ playerId));
 
         player.setBalance((player.getBalance()) - price);
+        playerRepository.save(player);
+    }
+
+    @Transactional
+    public void addItemToBag(Long playerId, String itemId){
+        Player player = playerRepository.findById(playerId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found with id: "+ playerId));
+
+        player.insertIntoBag(itemId);
         playerRepository.save(player);
     }
 }

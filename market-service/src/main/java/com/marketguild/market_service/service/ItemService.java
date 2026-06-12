@@ -6,11 +6,10 @@ import com.marketguild.market_service.model.Item;
 import com.marketguild.market_service.producer.ItemBoughtProducer;
 import com.marketguild.market_service.repository.ItemRepository;
 import feign.FeignException;
+import org.slf4j.MDC;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -50,7 +49,7 @@ public class ItemService {
 
             itemRepository.save(newItem);
 
-            ItemBoughtEvent  itemBoughtEvent = new ItemBoughtEvent(sellerId, newItem.getId(), price);
+            ItemBoughtEvent  itemBoughtEvent = new ItemBoughtEvent(sellerId, newItem.getId(), price, MDC.get("correlationId"));
 
             itemBoughtProducer.publishOrderEvent(itemBoughtEvent);
 

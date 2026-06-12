@@ -1,7 +1,6 @@
 package com.marketguild.market_service.producer;
 
 import com.marketguild.market_service.event.ItemBoughtEvent;
-import com.marketguild.market_service.model.Item;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 

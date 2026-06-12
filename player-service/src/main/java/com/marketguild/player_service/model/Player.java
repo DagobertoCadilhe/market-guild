@@ -2,6 +2,9 @@ package com.marketguild.player_service.model;
 
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "players")
 public class Player {
@@ -16,6 +19,11 @@ public class Player {
 
     @Column(name = "balance")
     private Double balance;
+
+    @ElementCollection
+    @CollectionTable(name = "player_bag", joinColumns = @JoinColumn(name = "player_id"))
+    @Column(name = "item_id")
+    private List<String> bag = new ArrayList<>();
 
     public Double getBalance() {
         return balance;
@@ -40,4 +48,13 @@ public class Player {
     public void setName(String name) {
         this.name = name;
     }
+
+    public void insertIntoBag(String itemId){
+        bag.add(itemId);
+    }
+
+    public List<String> getBag() {
+        return bag;
+    }
+
 }

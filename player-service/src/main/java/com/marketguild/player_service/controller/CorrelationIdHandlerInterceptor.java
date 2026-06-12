@@ -1,4 +1,4 @@
-package com.marketguild.market_service.config;
+package com.marketguild.player_service.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -9,23 +9,23 @@ import org.slf4j.LoggerFactory;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 
-public class CorrelationIDHandlerInterceptor implements HandlerInterceptor {
+public class CorrelationIdHandlerInterceptor implements HandlerInterceptor {
 
-    private static final Logger log = LoggerFactory.getLogger(CorrelationIDHandlerInterceptor.class);
+    private static final Logger log = LoggerFactory.getLogger(CorrelationIdHandlerInterceptor.class);
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
 
-       String correlationId = request.getHeader("X-Correlation-ID");
+        String correlationId = request.getHeader("X-Correlation-ID");
 
-       if (correlationId == null){
-           correlationId = "NO-CORRELATION-ID";
-       }
+        if (correlationId == null){
+            correlationId = "NO-CORRELATION-ID";
+        }
 
-       MDC.put("correlationId", correlationId);
-       log.info("[{}] Requisição: {} {}", correlationId,
-               request.getMethod(),
-               request.getRequestURI());
+        MDC.put("correlationId", correlationId);
+        log.info("[{}] Request: {} {}", correlationId,
+                request.getMethod(),
+                request.getRequestURI());
 
         return HandlerInterceptor.super.preHandle(request, response, handler);
     }

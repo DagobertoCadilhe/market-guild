@@ -1,6 +1,6 @@
 package com.marketguild.player_service.dto;
 
-public class PlayerRequest {
+public class PlayerDTO {
     private String name;
     private Double balance;
 
@@ -19,4 +19,5 @@ public class PlayerRequest {
     public void setBalance(Double balance) {
         this.balance = balance;
     }
+
 }

@@ -1,6 +1,6 @@
 package com.marketguild.player_service.config;
 
-import com.marketguild.player_service.controller.CorrelationIDHandlerInterceptor;
+import com.marketguild.player_service.controller.CorrelationIdHandlerInterceptor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -10,6 +10,6 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(new CorrelationIDHandlerInterceptor());
+        registry.addInterceptor(new CorrelationIdHandlerInterceptor());
     }
 }

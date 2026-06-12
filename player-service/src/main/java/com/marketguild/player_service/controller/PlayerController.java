@@ -1,8 +1,7 @@
 package com.marketguild.player_service.controller;
 
-import com.marketguild.player_service.dto.PlayerRequest;
+import com.marketguild.player_service.dto.PlayerDTO;
 import com.marketguild.player_service.model.Player;
-import com.marketguild.player_service.repository.PlayerRepository;
 import com.marketguild.player_service.service.PlayerService;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,7 +17,7 @@ public class PlayerController {
 
 
     @PostMapping()
-    public Player createPlayer(@RequestBody PlayerRequest playerDTO){
+    public Player createPlayer(@RequestBody PlayerDTO playerDTO){
 
         Player newPlayer = playerService.createPlayer(playerDTO.getName(), playerDTO.getBalance());
 
