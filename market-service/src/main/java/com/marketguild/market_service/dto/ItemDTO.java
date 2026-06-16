@@ -1,12 +1,11 @@
 package com.marketguild.market_service.dto;
 
+import com.marketguild.market_service.model.ItemType;
+
 public class ItemDTO {
-    // name, sellerId, price
 
     private String name;
-    private Double price;
-    private Long sellerId;
-
+    private ItemType type;
 
     public String getName() {
         return name;
@@ -16,19 +15,11 @@ public class ItemDTO {
         this.name = name;
     }
 
-    public Double getPrice() {
-        return price;
+    public ItemType getType() {
+        return type;
     }
 
-    public void setPrice(Double price) {
-        this.price = price;
-    }
-
-    public Long getSellerId() {
-        return sellerId;
-    }
-
-    public void setSellerId(Long sellerId) {
-        this.sellerId = sellerId;
+    public void setType(ItemType type) {
+        this.type = type;
     }
 }

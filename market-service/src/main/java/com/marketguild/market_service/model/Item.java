@@ -2,18 +2,21 @@ package com.marketguild.market_service.model;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
+import org.springframework.data.mongodb.core.mapping.FieldType;
 
 @Document(collection = "itens")
 public class Item {
 
-    // name, id, sellerId, price
+    // name, id, type
 
     @Id
     private String id;
-
     private String name;
-    private Double price;
-    private Long sellerId;
+
+    @Field(targetType = FieldType.STRING)
+    private ItemType type;
+
 
     public String getName() {
         return name;
@@ -23,27 +26,19 @@ public class Item {
         this.name = name;
     }
 
-    public Double getPrice() {
-        return price;
-    }
-
-    public void setPrice(Double price) {
-        this.price = price;
-    }
-
-    public Long getSellerId() {
-        return sellerId;
-    }
-
-    public void setSellerId(Long sellerId) {
-        this.sellerId = sellerId;
-    }
-
     public String getId() {
         return id;
     }
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public ItemType getType() {
+        return type;
+    }
+
+    public void setType(ItemType type) {
+        this.type = type;
     }
 }

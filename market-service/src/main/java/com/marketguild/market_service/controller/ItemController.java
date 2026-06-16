@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/market")
+@RequestMapping("/api/items")
 public class ItemController {
 
     private final ItemService itemService;
@@ -19,12 +19,10 @@ public class ItemController {
         this.itemService = itemService;
     }
 
-    // get find by id, post create, get find all items
-
     @PostMapping()
     public Item createItem(@RequestBody ItemDTO itemDTO){
 
-        Item newItem = itemService.createItem(itemDTO.getName(), itemDTO.getPrice(), itemDTO.getSellerId());
+        Item newItem = itemService.createItem(itemDTO.getName(), itemDTO.getType());
         return newItem;
     }
 

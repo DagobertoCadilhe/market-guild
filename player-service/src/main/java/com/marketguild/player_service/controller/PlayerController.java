@@ -14,8 +14,6 @@ public class PlayerController {
         this.playerService = playerService;
     }
 
-
-
     @PostMapping()
     public Player createPlayer(@RequestBody PlayerDTO playerDTO){
 

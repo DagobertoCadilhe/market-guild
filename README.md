@@ -30,7 +30,7 @@ Cliente → API Gateway → market-service → Feign → player-service
 ## Tecnologias Utilizadas
 - Spring Boot 4.x
 - Eureka (Spring Cloud Netflix)
-- API Gateway (Spring Cloud Gateway WebFlux — reativo)
+- API Gateway (Spring Cloud Gateway WebFlux - reativo)
 - Apache Kafka (KRaft mode, sem Zookeeper)
 - OpenFeign
 - Resilience4j (Circuit Breaker)
@@ -43,19 +43,22 @@ Cliente → API Gateway → market-service → Feign → player-service
 - Correlation ID manual (rastreamento entre serviços)
 
 ## Fluxo de Compra
-1. Cliente faz `POST /api/market` via Gateway
-2. `market-service` verifica saldo do player via Feign (síncrono)
-3. Item é salvo no MongoDB
-4. Evento `ItemBoughtEvent` é publicado no Kafka (assíncrono)
-5. `player-service` consome o evento, debita o saldo e adiciona o item na bag do player
+1. Vendedor cria um item via `POST /api/items`
+2. Vendedor lista o item no mercado via `POST /api/listing` com preço e ID do item
+3. Comprador consulta os itens disponíveis via `GET /api/listing/active`
+4. Comprador realiza a compra via `POST /api/listing/buy`
+5. `market-service` verifica saldo do comprador via Feign (síncrono)
+6. A listagem é removida do mercado
+7. Evento `ItemBoughtEvent` é publicado no Kafka (assíncrono)
+8. `player-service` consome o evento, debita o saldo e adiciona o item na bag do comprador
 
 ## Observabilidade
 
 ### Correlation ID
-O API Gateway gera um `X-Correlation-ID` único para cada requisição. Esse ID é propagado via header HTTP (Feign) e via payload do evento Kafka, aparecendo em todos os logs de todos os serviços. Isso permite rastrear uma operação completa — síncrona e assíncrona — por um único identificador.
+O API Gateway gera um `X-Correlation-ID` único para cada requisição. Esse ID é propagado via header HTTP (Feign) e via payload do evento Kafka, aparecendo em todos os logs de todos os serviços. Isso permite rastrear uma operação completa, síncrona e assíncrona, por um único identificador.
 
 ### Métricas
-O Spring Boot Actuator expõe métricas em `/actuator/prometheus`. O Prometheus coleta essas métricas a cada 15 segundos. O Grafana visualiza as métricas em dashboards.
+O Spring Boot Actuator expõe métricas em `/actuator/prometheus`. O Prometheus coleta essas métricas a cada 15 segundos. O Grafana visualiza as métricas.
 
 ### Logs
 O Promtail coleta automaticamente os logs de todos os containers Docker e os envia para o Loki. O Grafana permite filtrar logs por serviço e por Correlation ID.
@@ -102,12 +105,20 @@ docker-compose up --build
 | GET | /api/players/{id} | Buscar um player pelo ID (inclui bag) |
 | PATCH | /api/players/{id}/balance | Subtrair do balance do player |
 
-### market-service
+### market-service — Items
 | Método | Endpoint | Descrição |
 |---|---|---|
-| POST | /api/market | Listar um item no mercado |
-| GET | /api/market/{itemId} | Buscar um item pelo ID |
-| GET | /api/market/list | Ver todos os itens listados |
+| POST | /api/items | Criar um item |
+| GET | /api/items/{itemId} | Buscar um item pelo ID |
+| GET | /api/items/list | Listar todos os itens |
+
+### market-service — Listagens
+| Método | Endpoint | Descrição |
+|---|---|---|
+| POST | /api/listing | Listar um item no mercado |
+| GET | /api/listing/active | Ver todos os itens disponíveis no mercado |
+| GET | /api/listing/active/{id} | Buscar uma listagem pelo ID |
+| POST | /api/listing/buy | Comprar um item listado |
 
 ## Como Acessar os Serviços de Observabilidade
 | Serviço | URL | Credenciais |
@@ -123,5 +134,6 @@ Utilize a porta **8080** em todas as requisições. O Gateway redirecionará aut
 **Exemplo:**
 ```
 http://localhost:8080/api/players  →  player-service
-http://localhost:8080/api/market   →  market-service
+http://localhost:8080/api/items    →  market-service
+http://localhost:8080/api/listing  →  market-service
 ```
