@@ -6,10 +6,7 @@ Market Guild é um projeto que busca simular o mercado de um jogo como Tibia. Us
 ## Arquitetura
 A solução é composta por microsserviços independentes com bancos de dados separados, comunicação síncrona via Feign e assíncrona via Kafka, e uma camada completa de observabilidade.
 
-```
-Cliente → API Gateway → market-service → Feign → player-service
-                                       → Kafka → player-service (consumer)
-```
+![Diagrama de Arquitetura](docs/diagrama-arquitetura.png)
 
 ## Lista dos Serviços
 | Serviço | Responsabilidade | Porta |
@@ -50,7 +47,7 @@ Cliente → API Gateway → market-service → Feign → player-service
 5. `market-service` verifica saldo do comprador via Feign (síncrono)
 6. A listagem é removida do mercado
 7. Evento `ItemBoughtEvent` é publicado no Kafka (assíncrono)
-8. `player-service` consome o evento, debita o saldo e adiciona o item na bag do comprador
+8. `player-service` consome o evento, debita o saldo (internamente, via chamada direta ao PlayerService) e adiciona o item na bag do comprador
 
 ## Observabilidade
 
@@ -103,16 +100,17 @@ docker-compose up --build
 |---|---|---|
 | POST | /api/players | Criar um player |
 | GET | /api/players/{id} | Buscar um player pelo ID (inclui bag) |
-| PATCH | /api/players/{id}/balance | Subtrair do balance do player |
 
-### market-service — Items
+> O endpoint `PATCH /internal/players/{id}/balance` existe apenas para fins de teste e desenvolvimento local. Ele **não é exposto pelo API Gateway** propositalmente, evitando que qualquer cliente externo possa alterar o saldo de um player diretamente. No fluxo real de produção, o saldo é debitado exclusivamente pelo consumer do Kafka (`ItemBoughtConsumer`), que chama o `PlayerService` diretamente dentro do próprio serviço, sem passar por nenhum endpoint HTTP.
+
+### market-service - Items
 | Método | Endpoint | Descrição |
 |---|---|---|
 | POST | /api/items | Criar um item |
 | GET | /api/items/{itemId} | Buscar um item pelo ID |
 | GET | /api/items/list | Listar todos os itens |
 
-### market-service — Listagens
+### market-service - Listagens
 | Método | Endpoint | Descrição |
 |---|---|---|
 | POST | /api/listing | Listar um item no mercado |
@@ -137,3 +135,5 @@ http://localhost:8080/api/players  →  player-service
 http://localhost:8080/api/items    →  market-service
 http://localhost:8080/api/listing  →  market-service
 ```
+
+Rotas sob `/internal/**` são propositalmente **não roteadas** pelo Gateway, só acessíveis diretamente no serviço (ex: `http://localhost:8081/internal/players/{id}/balance`), e usadas apenas para testes manuais durante o desenvolvimento.
