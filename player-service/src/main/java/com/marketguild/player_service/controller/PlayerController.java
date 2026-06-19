@@ -27,8 +27,4 @@ public class PlayerController {
         return playerService.findPlayerById(id);
     }
 
-    @PatchMapping("/{id}/balance")
-    public void updateBalance(@PathVariable Long id, @RequestBody Double price){
-        playerService.updateBalance(id, price);
-    }
 }
