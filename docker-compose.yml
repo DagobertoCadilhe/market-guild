@@ -11,8 +11,6 @@ services:
     environment:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: playerdb
-    ports:
-      - "5432:5432"
     networks:
       - market-network
     healthcheck:
@@ -23,17 +21,12 @@ services:
 
   mongodb:
     image: mongo:6
-    ports:
-      - "27017:27017"
     networks:
       - market-network
 
   kafka:
     image: confluentinc/cp-kafka:7.4.0
     container_name: kafka-broker
-    ports:
-      - "9092:9092"
-      - "9093:9093"
     environment:
       KAFKA_NODE_ID: 1
       KAFKA_PROCESS_ROLES: broker,controller
@@ -116,8 +109,6 @@ services:
 
   loki:
     image: grafana/loki:latest
-    ports:
-      - "3100:3100"
     networks:
       - market-network
 
