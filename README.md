@@ -9,26 +9,26 @@ A solução é composta por microsserviços independentes com bancos de dados se
 ![Diagrama de Arquitetura](docs/diagrama-arquitetura.png)
 
 ## Lista dos Serviços
-| Serviço | Responsabilidade | Porta |
+| Serviço | Responsabilidade | Porta exposta no host |
 |---|---|---|
 | eureka-server | Discovery server dos serviços | 8761 |
 | api-gateway | Ponto único de entrada da rede (reativo/WebFlux) | 8080 |
 | player-service | Microsserviço responsável pelo usuário/player | 8081 |
 | market-service | Microsserviço responsável pelo controle do mercado | 8082 |
-| postgres | Banco de dados relacional para o player-service | 5432 |
-| mongodb | Banco de dados não relacional para o market-service | 27017 |
-| kafka | Broker de mensagens para comunicação assíncrona | 9092 |
+| postgres | Banco de dados relacional para o player-service | Não exposta (apenas rede interna) |
+| mongodb | Banco de dados não relacional para o market-service | Não exposta (apenas rede interna) |
+| kafka | Broker de mensagens para comunicação assíncrona | Não exposta (apenas rede interna) |
 | kafka-ui | Interface visual para monitorar tópicos Kafka | 8090 |
 | prometheus | Coleta de métricas dos serviços | 9090 |
-| loki | Agregador de logs | 3100 |
+| loki | Agregador de logs | Não exposta (apenas rede interna) |
 | promtail | Agente de coleta de logs dos containers | - |
 | grafana | Visualização de métricas e logs | 3000 |
 
 ## Tecnologias Utilizadas
-- Spring Boot 4.x
-- Eureka (Spring Cloud Netflix)
-- API Gateway (Spring Cloud Gateway WebFlux - reativo)
-- Apache Kafka (KRaft mode, sem Zookeeper)
+- Spring Boot
+- Eureka
+- API Gateway (reativo)
+- Apache Kafka
 - OpenFeign
 - Resilience4j (Circuit Breaker)
 - PostgreSQL
@@ -68,30 +68,38 @@ O Promtail coleta automaticamente os logs de todos os containers Docker e os env
 ## Como Executar o Projeto
 1. Faça o download do projeto
 2. Abra o Docker Desktop
-3. Abra um terminal e aponte para o diretório do projeto:
+3. Compile cada microsserviço antes de subir os containers, gerando o `.jar` necessário para o build das imagens:
+```bash
+cd player-service
+./mvnw clean package -DskipTests
+cd ../market-service
+./mvnw clean package -DskipTests
+cd ../api-gateway
+./mvnw clean package -DskipTests
+cd ../eureka-server
+./mvnw clean package -DskipTests
+cd ..
+```
+4. Abra um terminal e aponte para o diretório do projeto:
 ```bash
 cd \market-guild
 ```
-4. Execute o comando:
+5. Execute o comando:
 ```bash
 docker-compose up --build
 ```
-5. Aguarde todos os containers subirem.
+6. Aguarde todos os containers subirem.
 
 ## Portas Utilizadas
-| Serviço | Porta |
+| Serviço | Porta no host |
 |---|---|
 | Eureka | 8761 |
 | API Gateway | 8080 |
 | player-service | 8081 |
 | market-service | 8082 |
-| PostgreSQL | 5432 |
-| MongoDB | 27017 |
-| Kafka | 9092 |
 | Kafka UI | 8090 |
 | Prometheus | 9090 |
 | Grafana | 3000 |
-| Loki | 3100 |
 
 ## Exemplos de Endpoints
 
@@ -135,5 +143,3 @@ http://localhost:8080/api/players  →  player-service
 http://localhost:8080/api/items    →  market-service
 http://localhost:8080/api/listing  →  market-service
 ```
-
-Rotas sob `/internal/**` são propositalmente **não roteadas** pelo Gateway, só acessíveis diretamente no serviço (ex: `http://localhost:8081/internal/players/{id}/balance`), e usadas apenas para testes manuais durante o desenvolvimento.
