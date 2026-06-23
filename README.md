@@ -4,7 +4,7 @@
 Market Guild é um projeto que busca simular o mercado de um jogo como Tibia. Usando tecnologias como PostgreSQL e MongoDB para armazenamento dos dados de jogadores e itens do mercado respectivamente, Spring Boot para o desenvolvimento dos microsserviços que são o coração da aplicação, e muitas outras ferramentas para simular o mercado.
 
 ## Arquitetura
-A solução é composta por microsserviços independentes com bancos de dados separados, comunicação síncrona via Feign e assíncrona via Kafka, e uma camada completa de observabilidade.
+A solução é composta por microsserviços independentes com bancos de dados separados, comunicação síncrona via Feign (protegida por circuit breaker) e assíncrona via Kafka, e uma camada completa de observabilidade com métricas, logs e tracing distribuído.
 
 ![Diagrama de Arquitetura](docs/diagrama-arquitetura.png)
 
@@ -22,7 +22,8 @@ A solução é composta por microsserviços independentes com bancos de dados se
 | prometheus | Coleta de métricas dos serviços | 9090 |
 | loki | Agregador de logs | Não exposta (apenas rede interna) |
 | promtail | Agente de coleta de logs dos containers | - |
-| grafana | Visualização de métricas e logs | 3000 |
+| tempo | Armazenamento e consulta de traces distribuídos | Não exposta (apenas rede interna) |
+| grafana | Visualização de métricas, logs e traces | 3000 |
 
 ## Tecnologias Utilizadas
 - Spring Boot
@@ -30,24 +31,30 @@ A solução é composta por microsserviços independentes com bancos de dados se
 - API Gateway (reativo)
 - Apache Kafka
 - OpenFeign
-- Resilience4j (Circuit Breaker)
+- Resilience4j (Circuit Breaker, via `CircuitBreakerFactory`)
 - PostgreSQL
 - MongoDB
 - JPA / Hibernate
 - Docker / Docker Compose
 - Prometheus + Grafana (métricas)
 - Loki + Promtail (logs)
-- Correlation ID manual (rastreamento entre serviços)
+- OpenTelemetry + Grafana Tempo (tracing distribuído)
+- Correlation ID manual (rastreamento entre serviços, complementar ao tracing)
 
 ## Fluxo de Compra
 1. Vendedor cria um item via `POST /api/items`
 2. Vendedor lista o item no mercado via `POST /api/listing` com preço e ID do item
 3. Comprador consulta os itens disponíveis via `GET /api/listing/active`
 4. Comprador realiza a compra via `POST /api/listing/buy`
-5. `market-service` verifica saldo do comprador via Feign (síncrono)
+5. `market-service` busca os dados do comprador via Feign (protegido por circuit breaker) e valida localmente se o saldo é suficiente
 6. A listagem é removida do mercado
 7. Evento `ItemBoughtEvent` é publicado no Kafka (assíncrono)
 8. `player-service` consome o evento, debita o saldo (internamente, via chamada direta ao PlayerService) e adiciona o item na bag do comprador
+
+## Resiliência
+
+### Circuit Breaker
+A chamada de `market-service` para `player-service` via Feign é protegida por um circuit breaker explícito (Resilience4j, via `CircuitBreakerFactory`), implementado em `PlayerClientService`. Se o `player-service` estiver indisponível, o circuito abre após o limiar de falhas e o fallback retorna `503 Service Unavailable` imediatamente, sem nova tentativa de conexão.
 
 ## Observabilidade
 
@@ -64,6 +71,9 @@ O Promtail coleta automaticamente os logs de todos os containers Docker e os env
 ```
 {container=~"market-guild-player-service-1|market-guild-market-service-1"} |= "seu-correlation-id"
 ```
+
+### Tracing distribuído
+O OpenTelemetry instrumenta automaticamente as chamadas HTTP entre os serviços e, via Micrometer Observation, também o fluxo assíncrono pelo Kafka (produção e consumo do `ItemBoughtEvent`). Os traces são exportados para o Grafana Tempo e consultados no Grafana, com link direto para os logs correspondentes no Loki.
 
 ## Como Executar o Projeto
 1. Faça o download do projeto
