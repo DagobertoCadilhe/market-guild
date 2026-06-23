@@ -1,6 +1,5 @@
 package com.marketguild.market_service.controller;
 
-import com.marketguild.market_service.client.PlayerClient;
 import com.marketguild.market_service.dto.ItemDTO;
 import com.marketguild.market_service.model.Item;
 import com.marketguild.market_service.service.ItemService;
@@ -36,4 +35,3 @@ public class ItemController {
         return itemService.findAllItems();
     }
 }
-

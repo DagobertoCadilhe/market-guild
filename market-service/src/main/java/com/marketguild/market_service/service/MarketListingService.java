@@ -1,6 +1,6 @@
 package com.marketguild.market_service.service;
 
-import com.marketguild.market_service.client.PlayerClient;
+import com.marketguild.market_service.client.PlayerClientService;
 import com.marketguild.market_service.dto.PlayerDTO;
 import com.marketguild.market_service.event.ItemBoughtEvent;
 import com.marketguild.market_service.model.Item;
@@ -20,13 +20,13 @@ import java.util.List;
 public class MarketListingService {
 
     private final MarketListingRepository marketListingRepository;
-    private final PlayerClient playerClient;
+    private final PlayerClientService playerClientService;
     private final ItemService itemService;
     private final ItemBoughtProducer itemBoughtProducer;
 
-    public MarketListingService(MarketListingRepository marketListingRepository, PlayerClient playerClient, ItemService itemService, ItemBoughtProducer itemBoughtProducer) {
+    public MarketListingService(MarketListingRepository marketListingRepository, PlayerClientService playerClientService, ItemService itemService, ItemBoughtProducer itemBoughtProducer) {
         this.marketListingRepository = marketListingRepository;
-        this.playerClient = playerClient;
+        this.playerClientService = playerClientService;
         this.itemService = itemService;
         this.itemBoughtProducer = itemBoughtProducer;
     }
@@ -58,7 +58,7 @@ public class MarketListingService {
     public MarketListing buyListedItem(String itemId, Long buyerId){
         try {
             MarketListing boughtItem = findItemById(itemId);
-            PlayerDTO buyer = playerClient.findById(buyerId);
+            PlayerDTO buyer = playerClientService.findById(buyerId);
 
             if (buyer.getBalance() < boughtItem.getListedPrice()) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Insufficient balance");
