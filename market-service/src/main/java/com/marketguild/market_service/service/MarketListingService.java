@@ -9,6 +9,7 @@ import com.marketguild.market_service.producer.ItemBoughtProducer;
 import com.marketguild.market_service.repository.ItemRepository;
 import com.marketguild.market_service.repository.MarketListingRepository;
 import feign.FeignException;
+import org.apache.kafka.common.KafkaException;
 import org.slf4j.MDC;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -78,6 +79,9 @@ public class MarketListingService {
             return listingBought;
         } catch (FeignException.NotFound e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Player not found with id: " + buyerId);
+        } catch (KafkaException e) {
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Não foi possível processar a compra, tente novamente");
         }
+
     }
 }
