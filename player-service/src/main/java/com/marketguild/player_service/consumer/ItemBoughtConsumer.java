@@ -23,6 +23,7 @@ public class ItemBoughtConsumer {
                 event.correlationId(), event.playerId(), event.itemId(), event.price());
 
         Player targetedPlayer = playerService.findPlayerById(event.playerId());
+
         playerService.updateBalance(targetedPlayer.getId(), event.price());
         playerService.addItemToBag(targetedPlayer.getId(), event.itemId());
 
