@@ -47,8 +47,8 @@ A solução é composta por microsserviços independentes com bancos de dados se
 3. Comprador consulta os itens disponíveis via `GET /api/listing/active`
 4. Comprador realiza a compra via `POST /api/listing/buy`
 5. `market-service` busca os dados do comprador via Feign (protegido por circuit breaker) e valida localmente se o saldo é suficiente
-6. A listagem é removida do mercado
-7. Evento `ItemBoughtEvent` é publicado no Kafka (assíncrono)
+6. Evento `ItemBoughtEvent` é publicado no Kafka (assíncrono)
+7. A listagem é removida do mercado
 8. `player-service` consome o evento, debita o saldo (internamente, via chamada direta ao PlayerService) e adiciona o item na bag do comprador
 
 ## Resiliência
