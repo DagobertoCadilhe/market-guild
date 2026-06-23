@@ -48,7 +48,7 @@ public class MarketListingService {
         return marketListingRepository.findAll();
     }
 
-    public MarketListing findItemById(String itemId){
+    public MarketListing findActiveListingById(String itemId){
         MarketListing item = marketListingRepository.findById(itemId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,"Item not found with id: "+ itemId));
 
@@ -57,24 +57,25 @@ public class MarketListingService {
 
     public MarketListing buyListedItem(String itemId, Long buyerId){
         try {
-            MarketListing boughtItem = findItemById(itemId);
+            MarketListing listingBought = findActiveListingById(itemId);
+            Item boughtItem = listingBought.getListedItem();
             PlayerDTO buyer = playerClientService.findById(buyerId);
 
-            if (buyer.getBalance() < boughtItem.getListedPrice()) {
+            if (buyer.getBalance() < listingBought.getListedPrice()) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Insufficient balance");
             }
 
             ItemBoughtEvent itemBoughtEvent = new ItemBoughtEvent(
                     buyerId, boughtItem.getId(),
-                    boughtItem.getListedPrice(),
+                    listingBought.getListedPrice(),
                     MDC.get("correlationId")
             );
 
             itemBoughtProducer.publishOrderEvent(itemBoughtEvent);
 
-            marketListingRepository.delete(boughtItem);
+            marketListingRepository.delete(listingBought);
 
-            return boughtItem;
+            return listingBought;
         } catch (FeignException.NotFound e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Player not found with id: " + buyerId);
         }

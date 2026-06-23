@@ -36,11 +36,11 @@ public class MarketListingController {
 
     @GetMapping("/active/{listingId}")
     public MarketListing findActiveListingById (@PathVariable String listingId){
-        return marketListingService.findItemById(listingId);
+        return marketListingService.findActiveListingById(listingId);
     }
 
     @PostMapping("/buy")
     public MarketListing buyListedItem (@RequestBody BuyItemDTO buyItemDTO){
-        return marketListingService.buyListedItem(buyItemDTO.getItemId(), buyItemDTO.getBuyerId());
+        return marketListingService.buyListedItem(buyItemDTO.getListingId(), buyItemDTO.getBuyerId());
     }
 }

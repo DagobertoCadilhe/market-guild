@@ -2,16 +2,15 @@ package com.marketguild.market_service.dto;
 
 public class BuyItemDTO {
 
-    private String itemId;
+    private String listingId;
     private Long buyerId;
 
-
-    public String getItemId() {
-        return itemId;
+    public String getListingId() {
+        return listingId;
     }
 
-    public void setItemId(String itemId) {
-        this.itemId = itemId;
+    public void setListingId(String listingId) {
+        this.listingId = listingId;
     }
 
     public Long getBuyerId() {
