@@ -22,6 +22,7 @@ public class CorrelationIdHandlerInterceptor implements HandlerInterceptor {
             correlationId = "NO-CORRELATION-ID";
         }
 
+        response.setHeader("X-Correlation-ID", correlationId);
         MDC.put("correlationId", correlationId);
         log.info("[{}] Request: {} {}", correlationId,
                 request.getMethod(),
